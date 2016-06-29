@@ -1,3 +1,5 @@
+# This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
+
 # Quickly copy and set trailing \0
 @inline function fast_utf_copy{S <: Union{UTF16String, UTF32String}, T <: Union{UInt16, UInt32}}(
                               ::Type{S}, ::Type{T}, len, dat, flag::Bool=false)

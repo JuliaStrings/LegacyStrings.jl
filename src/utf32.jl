@@ -1,3 +1,5 @@
+# This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
+
 UTF32String(data::Vector{Char}) = UTF32String(reinterpret(UInt32, data))
 
 # UTF-32 basic functions

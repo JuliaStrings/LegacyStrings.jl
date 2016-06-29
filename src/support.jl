@@ -1,3 +1,5 @@
+# This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
+
 ## Error messages for Unicode / UTF support
 
 const UTF_ERR_SHORT             = "invalid UTF-8 sequence starting at index <<1>> (0x<<2>> missing one or more continuation bytes)"

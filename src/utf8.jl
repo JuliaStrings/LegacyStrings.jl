@@ -1,3 +1,5 @@
+# This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
+
 ## basic UTF-8 decoding & iteration ##
 
 const utf8_offset = [

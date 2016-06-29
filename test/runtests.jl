@@ -1,3 +1,5 @@
+# This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
+
 using Base.Test
 importall LegacyStrings
 import LegacyStrings:
