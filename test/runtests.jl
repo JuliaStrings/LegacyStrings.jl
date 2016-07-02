@@ -1,6 +1,7 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
 using Base.Test
+using Compat: view
 importall LegacyStrings
 import LegacyStrings:
     ascii,
@@ -21,7 +22,11 @@ badstring32  = UInt32['a']
 # Unicode errors
 let io = IOBuffer()
     show(io, UnicodeError(UTF_ERR_SHORT, 1, 10))
-    check = "UnicodeError: invalid UTF-8 sequence starting at index 1 (0xa missing one or more continuation bytes)"
+    if VERSION >= v"0.5.0-dev+1956"
+        check = "UnicodeError: invalid UTF-8 sequence starting at index 1 (0xa missing one or more continuation bytes)"
+    else
+        check = "UnicodeError: invalid UTF-8 sequence starting at index 1 (0xa) missing one or more continuation bytes)"
+    end
     @test takebuf_string(io) == check
 end
 
