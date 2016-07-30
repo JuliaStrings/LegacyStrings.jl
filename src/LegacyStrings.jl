@@ -1,5 +1,7 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
+VERSION >= v"0.4.0-dev+6521" && __precompile__(true)
+
 module LegacyStrings
 
 export
