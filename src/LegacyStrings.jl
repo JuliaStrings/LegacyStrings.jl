@@ -42,7 +42,7 @@ import Base:
     uppercase,
     write
 
-    if VERSION >= v"0.5.0-"
+    if !isdefined(Base, :ASCIIString)
         immutable ASCIIString <: DirectIndexString
             data::Array{UInt8,1}
         end
