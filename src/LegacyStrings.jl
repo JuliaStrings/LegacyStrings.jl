@@ -83,9 +83,9 @@ import Base:
         using Base: UTF_ERR_SHORT, checkstring
     end
 
-    if VERSION >= v"0.6.0"
-        include("rep.jl")
-    else
+    if isdefined(Base, :RepString)
         using Base: RepString
+    else
+        include("rep.jl")
     end
 end # module
