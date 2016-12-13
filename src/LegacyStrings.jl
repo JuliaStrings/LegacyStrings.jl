@@ -7,6 +7,7 @@ module LegacyStrings
 export
     ByteString,
     ASCIIString,
+    RepString,
     UTF8String,
     UTF16String,
     UTF32String,
@@ -80,5 +81,11 @@ import Base:
         include("utf32.jl")
     else
         using Base: UTF_ERR_SHORT, checkstring
+    end
+
+    if VERSION >= v"0.6.0"
+        include("rep.jl")
+    else
+        using Base: RepString
     end
 end # module
