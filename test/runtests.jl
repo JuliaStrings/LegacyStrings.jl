@@ -518,3 +518,31 @@ let str = ascii("this ")
 end
 
 @test isvalid(Char['f','o','o','b','a','r'])
+
+
+## Repeat strings ##
+
+# Base Julia issue #7764
+let
+    rs = RepString("foo", 2)
+    @test length(rs) == 6
+    @test sizeof(rs) == 6
+    @test isascii(rs)
+    @test convert(RepString, "foobar") == "foobar"
+    @test typeof(convert(RepString, "foobar")) == RepString
+
+    srep = RepString("Σβ",2)
+    s="Σβ"
+    ss=SubString(s,1,endof(s))
+
+    @test ss^2 == "ΣβΣβ"
+    @test RepString(ss,2) == "ΣβΣβ"
+
+    @test endof(srep) == 7
+
+    @test next(srep, 3) == ('β',5)
+    @test next(srep, 7) == ('β',9)
+
+    @test srep[7] == 'β'
+    @test_throws BoundsError srep[8]
+end
