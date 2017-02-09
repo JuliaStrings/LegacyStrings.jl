@@ -279,7 +279,8 @@ isvalid(::Type{UTF8String}, s::Union{Vector{UInt8},ByteString}) = byte_string_cl
 bytestring() = ASCIIString("")
 function bytestring(s::AbstractString...)
     str = Base.print_to_string(s...)
-    isvalid(ASCIIString, str.data) ? ASCIIString(str.data) : UTF8String(str.data)
+    data = Vector{UInt8}(str)
+    isvalid(ASCIIString, data) ? ASCIIString(data) : UTF8String(data)
 end
 bytestring(s::Vector{UInt8}) = bytestring(String(s))
 bytestring(p::Union{Ptr{UInt8},Ptr{Int8},Cstring}) = unsafe_string(p)

@@ -1,7 +1,8 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
 using Base.Test
-using Compat: view
+using Compat
+using Compat: view, String
 importall LegacyStrings
 import LegacyStrings:
     ascii,
@@ -27,7 +28,7 @@ let io = IOBuffer()
     else
         check = "UnicodeError: invalid UTF-8 sequence starting at index 1 (0xa) missing one or more continuation bytes)"
     end
-    @test takebuf_string(io) == check
+    @test String(take!(io)) == check
 end
 
 ## Test invalid sequences
@@ -243,7 +244,7 @@ u16 = utf16(u8)
 @test length(u16) == 5
 @test utf8(u16) == u8
 @test collect(u8) == collect(u16)
-@test u8 == utf16(u16.data[1:end-1]) == utf16(copy!(Array(UInt8, 18), 1, reinterpret(UInt8, u16.data), 1, 18))
+@test u8 == utf16(u16.data[1:end-1]) == utf16(copy!(Vector{UInt8}(18), 1, reinterpret(UInt8, u16.data), 1, 18))
 @test u8 == utf16(pointer(u16)) == utf16(convert(Ptr{Int16}, pointer(u16)))
 @test_throws UnicodeError utf16(utf32(Char(0x120000)))
 @test_throws UnicodeError utf16(UInt8[1,2,3])
@@ -264,7 +265,7 @@ u32 = utf32(u8)
 @test length(u32) == 5
 @test utf8(u32) == u8
 @test collect(u8) == collect(u32)
-@test u8 == utf32(u32.data[1:end-1]) == utf32(copy!(Array(UInt8, 20), 1, reinterpret(UInt8, u32.data), 1, 20))
+@test u8 == utf32(u32.data[1:end-1]) == utf32(copy!(Vector{UInt8}(20), 1, reinterpret(UInt8, u32.data), 1, 20))
 @test u8 == utf32(pointer(u32)) == utf32(convert(Ptr{Int32}, pointer(u32)))
 @test_throws UnicodeError utf32(UInt8[1,2,3])
 
