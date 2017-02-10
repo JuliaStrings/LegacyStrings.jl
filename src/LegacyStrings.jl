@@ -24,7 +24,6 @@ import Base:
     endof,
     getindex,
     isvalid,
-    lastidx,
     lcfirst,
     length,
     lowercase,
@@ -42,6 +41,12 @@ import Base:
     unsafe_convert,
     uppercase,
     write
+
+using Compat
+
+    if isdefined(Base, :lastidx)
+        import Base: lastidx
+    end
 
     if VERSION >= v"0.5.0-"
         immutable ASCIIString <: DirectIndexString

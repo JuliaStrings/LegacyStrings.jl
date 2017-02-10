@@ -150,7 +150,7 @@ function string(a::ByteString...)
         return a[1]::UTF8String
     end
     # ^^ at least one must be UTF-8 or the ASCII-only method would get called
-    data = Array(UInt8,0)
+    data = Vector{UInt8}(0)
     for d in a
         append!(data,d.data)
     end
@@ -158,7 +158,7 @@ function string(a::ByteString...)
 end
 
 function string(a::Union{ByteString,Char}...)
-    s = Array(UInt8,0)
+    s = Vector{UInt8}(0)
     for d in a
         if isa(d,Char)
             c = UInt32(d::Char)
@@ -300,7 +300,7 @@ function convert(::Type{UTF8String}, a::Vector{UInt8}, invalids_as::AbstractStri
             endn += 1
         end
         (endn > idx) && (endn -= 1)
-        splice!(a, idx:endn, invalids_as.data)
+        splice!(a, idx:endn, Vector{UInt8}(invalids_as))
         l = length(a)
     end
     UTF8String(a)

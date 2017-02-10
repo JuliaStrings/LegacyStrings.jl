@@ -29,7 +29,7 @@ function string(c::ASCIIString...)
     for s in c
         n += length(s.data)
     end
-    v = Array(UInt8,n)
+    v = Vector{UInt8}(n)
     o = 1
     for s in c
         ls = length(s.data)
@@ -97,7 +97,7 @@ write(io::IO, s::ASCIIString) = write(io, s.data)
 
 ascii(x) = convert(ASCIIString, x)
 convert(::Type{ASCIIString}, s::ASCIIString) = s
-convert(::Type{ASCIIString}, s::String) = ascii(s.data)
+convert(::Type{ASCIIString}, s::String) = ascii(Vector{UInt8}(s))
 convert(::Type{ASCIIString}, s::UTF8String) = ascii(s.data)
 convert(::Type{ASCIIString}, a::Vector{UInt8}) = begin
     isvalid(ASCIIString,a) || throw(ArgumentError("invalid ASCII sequence"))
