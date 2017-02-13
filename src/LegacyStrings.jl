@@ -77,7 +77,7 @@ using Compat
             end
         end
 
-        typealias ByteString Union{ASCIIString,UTF8String}
+        const ByteString = Union{ASCIIString,UTF8String}
 
         include("support.jl")
         include("ascii.jl")
