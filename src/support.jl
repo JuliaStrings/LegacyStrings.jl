@@ -173,7 +173,7 @@ function unsafe_checkstring(dat::AbstractVector{UInt8},
     return totalchar, flags, num4byte, num3byte, num2byte
 end
 
-typealias AbstractString1632{Tel<:Union{UInt16,UInt32}} Union{AbstractVector{Tel}, AbstractString}
+@compat AbstractString1632{Tel<:Union{UInt16,UInt32}} = Union{AbstractVector{Tel}, AbstractString}
 
 function unsafe_checkstring(
                       dat::AbstractString1632,
