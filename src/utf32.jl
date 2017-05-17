@@ -125,7 +125,7 @@ function convert(::Type{UTF32String}, dat::AbstractVector{UInt32})
 end
 
 convert(::Type{UTF32String}, data::AbstractVector{Int32}) =
-    convert(UTF32String, reinterpret(UInt32, convert(Vector{T}, data)))
+    convert(UTF32String, reinterpret(UInt32, convert(Vector{Int32}, data)))
 
 convert(::Type{UTF32String}, data::AbstractVector{Char}) =
     convert(UTF32String, map(UInt32, data))
@@ -151,20 +151,35 @@ unsafe_convert{T<:Union{UInt32,Int32,Char}}(::Type{Ptr{T}}, s::UTF32String) =
 
 function convert(T::Type{UTF32String}, bytes::AbstractArray{UInt8})
     isempty(bytes) && return empty_utf32
-    length(bytes) & 3 != 0 && throw(UnicodeError(UTF_ERR_ODD_BYTES_32,0,0))
-    data = reinterpret(UInt32, bytes)
-    # check for byte-order mark (BOM):
-    if data[1] == 0x0000feff # native byte order
-        d = Vector{UInt32}(length(data))
-        copy!(d,1, data, 2, length(data)-1)
-    elseif data[1] == 0xfffe0000 # byte-swapped
-        d = Vector{UInt32}(length(data))
-        for i = 2:length(data)
-            @inbounds d[i-1] = bswap(data[i])
+    nb = length(bytes)
+    nb & 3 != 0 && throw(UnicodeError(UTF_ERR_ODD_BYTES_32,0,0))
+    b1 = bytes[1]
+    b2 = bytes[2]
+    b3 = bytes[3]
+    b4 = bytes[4]
+    if b1 == 0 && b2 == 0 && b3 == 0xfe && b4 == 0xff
+        offset = 1
+        swap = false
+    elseif b1 == 0xff && b2 == 0xfe && b3 == 0 && b4 == 0
+        offset = 1
+        swap = true
+    else
+        offset = 0
+        swap = false
+    end
+    len = nb ÷ 4 - offset
+    d = Vector{UInt32}(len + 1)
+    if swap
+        @inbounds for i in 1:len
+            ib = i + offset
+            b1 = UInt32(bytes[ib * 2 - 1])
+            b2 = UInt32(bytes[ib * 2])
+            b3 = UInt32(bytes[ib * 2 + 1])
+            b4 = UInt32(bytes[ib * 2 + 2])
+            d[i] = (b1 << 24) | (b2 << 16) | (b3 << 8) | b4
         end
     else
-        d = Vector{UInt32}(length(data) + 1)
-        copy!(d, 1, data, 1, length(data)) # assume native byte order
+        unsafe_copy!(Ptr{UInt8}(pointer(d)), pointer(bytes, offset * 4 + 1), len * 4)
     end
     d[end] = 0 # NULL terminate
     UTF32String(d)

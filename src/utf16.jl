@@ -222,20 +222,31 @@ end
 
 function convert(T::Type{UTF16String}, bytes::AbstractArray{UInt8})
     isempty(bytes) && return UTF16String(UInt16[0])
-    isodd(length(bytes)) && throw(UnicodeError(UTF_ERR_ODD_BYTES_16, length(bytes), 0))
-    data = reinterpret(UInt16, bytes)
-    # check for byte-order mark (BOM):
-    if data[1] == 0xfeff        # native byte order
-        d = Vector{UInt16}(length(data))
-        copy!(d,1, data,2, length(data)-1)
-    elseif data[1] == 0xfffe    # byte-swapped
-        d = Vector{UInt16}(length(data))
-        for i = 2:length(data)
-            d[i-1] = bswap(data[i])
+    nb = length(bytes)
+    isodd(nb) && throw(UnicodeError(UTF_ERR_ODD_BYTES_16, length(bytes), 0))
+    b1 = bytes[1]
+    b2 = bytes[2]
+    if b1 == 0xfe && b2 == 0xff
+        offset = 1
+        swap = false
+    elseif b1 == 0xff && b2 == 0xfe
+        offset = 1
+        swap = true
+    else
+        offset = 0
+        swap = false
+    end
+    len = nb ÷ 2 - offset
+    d = Vector{UInt16}(len + 1)
+    if swap
+        @inbounds for i in 1:len
+            ib = i + offset
+            bhi = bytes[ib * 2 - 1]
+            blo = bytes[ib * 2]
+            d[i] = (UInt16(bhi) << 8) | blo
         end
     else
-        d = Vector{UInt16}(length(data) + 1)
-        copy!(d,1, data,1, length(data)) # assume native byte order
+        unsafe_copy!(Ptr{UInt8}(pointer(d)), pointer(bytes, offset * 2 + 1), len * 2)
     end
     d[end] = 0 # NULL terminate
     !isvalid(UTF16String, d) && throw(UnicodeError(UTF_ERR_INVALID_16,0,0))
