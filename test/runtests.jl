@@ -235,6 +235,9 @@ end
 # Specifically check UTF-8 string whose lead byte is same as a surrogate
 @test convert(UTF8String,b"\xed\x9f\xbf") == "\ud7ff"
 
+# issue #8
+@test !isempty(methods(string, Tuple{Char}))
+
 ## UTF-16 tests
 
 u8 = "\U10ffff\U1d565\U1d7f6\U00066\U2008a"
