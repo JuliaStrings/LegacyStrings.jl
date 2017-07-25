@@ -1,6 +1,6 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
-immutable RepString <: AbstractString
+struct RepString <: AbstractString
     string::AbstractString
     repeat::Integer
 end

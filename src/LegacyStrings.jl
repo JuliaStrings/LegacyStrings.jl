@@ -49,15 +49,15 @@ using Compat
     end
 
     if VERSION >= v"0.5.0-"
-        immutable ASCIIString <: DirectIndexString
+        struct ASCIIString <: DirectIndexString
             data::Array{UInt8,1}
         end
 
-        immutable UTF8String <: AbstractString
+        struct UTF8String <: AbstractString
             data::Vector{UInt8}
         end
 
-        immutable UTF16String <: AbstractString
+        struct UTF16String <: AbstractString
             data::Vector{UInt16} # includes 16-bit NULL termination after string chars
             function UTF16String(data::Vector{UInt16})
                 if length(data) < 1 || data[end] != 0
@@ -67,7 +67,7 @@ using Compat
             end
         end
 
-        immutable UTF32String <: DirectIndexString
+        struct UTF32String <: DirectIndexString
             data::Vector{UInt32} # includes 32-bit NULL termination after string chars
             function UTF32String(data::Vector{UInt32})
                 if length(data) < 1 || data[end] != 0
