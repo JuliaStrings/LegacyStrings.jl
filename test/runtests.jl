@@ -550,3 +550,31 @@ let
     @test srep[7] == 'β'
     @test_throws BoundsError srep[8]
 end
+
+
+## Reverse strings ##
+
+let
+    rs = RevString("foobar")
+    @test length(rs) == 6
+    @test sizeof(rs) == 6
+    @test isascii(rs)
+
+    # Base issue #4586
+    @test rsplit(RevString("ailuj"),'l') == ["ju","ia"]
+    @test parse(Float64,RevString("64")) === 46.0
+
+    # reverseind
+    for prefix in ("", "abcd", "\U0001d6a4\U0001d4c1", "\U0001d6a4\U0001d4c1c", " \U0001d6a4\U0001d4c1")
+        for suffix in ("", "abcde", "\U0001d4c1β\U0001d6a4", "\U0001d4c1β\U0001d6a4c", " \U0001d4c1β\U0001d6a4")
+            for c in ('X', 'δ', '\U0001d6a5')
+                s = convert(String, string(prefix, c, suffix))
+                rs = RevString(s)
+                r = reverse(s)
+                @test r == rs
+                ri = search(r, c)
+                @test c == rs[reverseind(rs, ri)] == r[ri]
+            end
+        end
+    end
+end
