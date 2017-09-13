@@ -311,4 +311,4 @@ Create a string from the address of a NUL-terminated UTF-16 string. A copy is ma
 pointer can be safely freed. If `length` is specified, the string does not have to be
 NUL-terminated.
 """
-utf16(::Union{Ptr{UInt16},Ptr{Int16}}, length=?)
+utf16(::Union{Ptr{UInt16},Ptr{Int16}}, length=length)
