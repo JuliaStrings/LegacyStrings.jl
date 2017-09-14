@@ -276,4 +276,4 @@ Create a string from the address of a NUL-terminated UTF-32 string. A copy is ma
 pointer can be safely freed. If `length` is specified, the string does not have to be
 NUL-terminated.
 """
-utf32(::Union{Ptr{Char},Ptr{UInt32},Ptr{Int32}}, length=?)
+utf32(::Union{Ptr{Char},Ptr{UInt32},Ptr{Int32}}, length=length)

@@ -440,7 +440,7 @@ for (fun, S, T) in ((utf16, UInt16, UTF16String), (utf32, UInt32, UTF32String))
     cmpx = (S == UInt16 ? cmp16 : cmp32)
     @test typeof(tst) == SubString{T}
     @test convert(T, tst) == str[4:end]
-    @test convert(Vector{Char}, x) == cmp
+    @test Vector{Char}(x) == cmp
     # Vector{T} / Array{T}
     @test convert(Vector{S}, x) == cmpx
     @test convert(Array{S}, x) == cmpx

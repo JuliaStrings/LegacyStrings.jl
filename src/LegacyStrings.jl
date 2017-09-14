@@ -50,11 +50,15 @@ using Compat
 
     if VERSION >= v"0.5.0-"
         immutable ASCIIString <: DirectIndexString
-            data::Array{UInt8,1}
+            data::Vector{UInt8}
+            ASCIIString(data::String) = new(Vector{UInt8}(data))
+            ASCIIString(data) = new(data)
         end
 
         immutable UTF8String <: AbstractString
             data::Vector{UInt8}
+            UTF8String(data::String) = new(Vector{UInt8}(data))
+            UTF8String(data) = new(data)
         end
 
         immutable UTF16String <: AbstractString
