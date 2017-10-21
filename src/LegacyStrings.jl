@@ -5,6 +5,7 @@ __precompile__(true)
 module LegacyStrings
 
 export
+    DirectIndexString,
     ByteString,
     ASCIIString,
     RepString,
@@ -97,4 +98,11 @@ using Compat
     else
         include("rep.jl")
     end
+
+    if isdefined(Base, :DirectIndexString)
+        using Base: DirectIndexString
+    else
+        include("directindex.jl")
+    end
+
 end # module
