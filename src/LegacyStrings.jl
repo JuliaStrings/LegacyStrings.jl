@@ -49,6 +49,12 @@ using Compat
         import Base: lastidx
     end
 
+    if isdefined(Base, :DirectIndexString)
+        using Base: DirectIndexString
+    else
+        include("directindex.jl")
+    end
+
     if VERSION >= v"0.5.0-"
         immutable ASCIIString <: DirectIndexString
             data::Vector{UInt8}
@@ -98,11 +104,4 @@ using Compat
     else
         include("rep.jl")
     end
-
-    if isdefined(Base, :DirectIndexString)
-        using Base: DirectIndexString
-    else
-        include("directindex.jl")
-    end
-
 end # module
