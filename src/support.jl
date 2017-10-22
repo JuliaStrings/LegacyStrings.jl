@@ -88,14 +88,16 @@ function unsafe_checkstring(dat::AbstractVector{UInt8},
     flags::UInt = 0
     totalchar = num2byte = num3byte = num4byte = 0
     @inbounds while pos <= endpos
-        ch, pos = next(dat, pos)
+        ch = dat[pos]
+        pos += 1
         totalchar += 1
         if ch > 0x7f
             # Check UTF-8 encoding
             if ch < 0xe0
                 # 2-byte UTF-8 sequence (i.e. characters 0x80-0x7ff)
                 (pos > endpos) && throw(UnicodeError(UTF_ERR_SHORT, pos, ch))
-                byt, pos = next(dat, pos)
+                byt = dat[pos]
+                pos += 1
                 ch = get_continuation(ch & 0x3f, byt, pos)
                 if ch > 0x7f
                     num2byte += 1
@@ -110,20 +112,25 @@ function unsafe_checkstring(dat::AbstractVector{UInt8},
              elseif ch < 0xf0
                 # 3-byte UTF-8 sequence (i.e. characters 0x800-0xffff)
                 (pos + 1 > endpos) && throw(UnicodeError(UTF_ERR_SHORT, pos, ch))
-                byt, pos = next(dat, pos)
+                byt = dat[pos]
+                pos += 1
                 ch = get_continuation(ch & 0x0f, byt, pos)
-                byt, pos = next(dat, pos)
+                byt = dat[pos]
+                pos += 1
                 ch = get_continuation(ch, byt, pos)
                 # check for surrogate pairs, make sure correct
                 if is_surrogate_codeunit(ch)
                     !is_surrogate_lead(ch) && throw(UnicodeError(UTF_ERR_NOT_LEAD, pos-2, ch))
                     # next character *must* be a trailing surrogate character
                     (pos + 2 > endpos) && throw(UnicodeError(UTF_ERR_MISSING_SURROGATE, pos-2, ch))
-                    byt, pos = next(dat, pos)
+                    byt = dat[pos]
+                    pos += 1
                     (byt != 0xed) && throw(UnicodeError(UTF_ERR_NOT_TRAIL, pos, byt))
-                    byt, pos = next(dat, pos)
+                    byt = dat[pos]
+                    pos += 1
                     surr = get_continuation(0x0000d, byt, pos)
-                    byt, pos = next(dat, pos)
+                    byt = dat[pos]
+                    pos += 1
                     surr = get_continuation(surr, byt, pos)
                     !is_surrogate_trail(surr) && throw(UnicodeError(UTF_ERR_NOT_TRAIL, pos-2, surr))
                     !accept_surrogates && throw(UnicodeError(UTF_ERR_SURROGATE, pos-2, surr))
@@ -140,11 +147,14 @@ function unsafe_checkstring(dat::AbstractVector{UInt8},
             elseif ch < 0xf5
                 # 4-byte UTF-8 sequence (i.e. characters > 0xffff)
                 (pos + 2 > endpos) && throw(UnicodeError(UTF_ERR_SHORT, pos, ch))
-                byt, pos = next(dat, pos)
+                byt = dat[pos]
+                pos += 1
                 ch = get_continuation(ch & 0x07, byt, pos)
-                byt, pos = next(dat, pos)
+                byt = dat[pos]
+                pos += 1
                 ch = get_continuation(ch, byt, pos)
-                byt, pos = next(dat, pos)
+                byt = dat[pos]
+                pos += 1
                 ch = get_continuation(ch, byt, pos)
                 if ch > 0x10ffff
                     throw(UnicodeError(UTF_ERR_INVALID, pos-3, ch))
@@ -187,7 +197,8 @@ function unsafe_checkstring(
     flags::UInt = 0
     totalchar = num2byte = num3byte = num4byte = 0
     @inbounds while pos <= endpos
-        ch, pos = next(dat, pos)
+        ch = dat[pos]
+        pos = nextind(dat, pos)
         totalchar += 1
         if ch > 0x7f
             if ch < 0x100
@@ -204,7 +215,8 @@ function unsafe_checkstring(
             elseif is_surrogate_lead(ch)
                 pos > endpos && throw(UnicodeError(UTF_ERR_MISSING_SURROGATE, pos, ch))
                 # next character *must* be a trailing surrogate character
-                ch, pos = next(dat, pos)
+                ch = dat[pos]
+                pos = nextind(dat, pos)
                 !is_surrogate_trail(ch) && throw(UnicodeError(UTF_ERR_NOT_TRAIL, pos, ch))
                 num4byte += 1
                 if !(typeof(dat) <: AbstractVector{UInt16})

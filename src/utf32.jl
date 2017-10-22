@@ -89,7 +89,7 @@ function convert(::Type{UTF32String}, str::UTF16String)
     # get number of words to create
     len, flags, num4byte = unsafe_checkstring(dat, 1, len>>>1)
     # No surrogate pairs, do optimized copy
-    (flags & UTF_UNICODE4) == 0 && @inbounds return UTF32String(copy!(Vector{Char}(len), dat))
+    (flags & UTF_UNICODE4) == 0 && @inbounds return UTF32String(copy!(Vector{UInt32}(len), dat))
     local ch::UInt32
     buf = Vector{UInt32}(len)
     out = 0
