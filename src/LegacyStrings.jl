@@ -5,6 +5,7 @@ __precompile__(true)
 module LegacyStrings
 
 export
+    DirectIndexString,
     ByteString,
     ASCIIString,
     RepString,
@@ -46,6 +47,12 @@ using Compat
 
     if isdefined(Base, :lastidx)
         import Base: lastidx
+    end
+
+    if isdefined(Base, :DirectIndexString)
+        using Base: DirectIndexString
+    else
+        include("directindex.jl")
     end
 
     if VERSION >= v"0.5.0-"
