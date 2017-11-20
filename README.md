@@ -3,8 +3,8 @@
 [![Travis CI Build Status](https://travis-ci.org/JuliaArchive/LegacyStrings.jl.svg?branch=master)](https://travis-ci.org/JuliaArchive/LegacyStrings.jl)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/ib52329urgg62jai?svg=true)](https://ci.appveyor.com/project/nalimilan/legacystrings-jl)
 
-[![Julia 0.4 Status](http://pkg.julialang.org/badges/LegacyStrings_0.4.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.4)
 [![Julia 0.5 Status](http://pkg.julialang.org/badges/LegacyStrings_0.5.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.5)
+[![Julia 0.6 Status](http://pkg.julialang.org/badges/LegacyStrings_0.6.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.6)
 
 The LegacyStrings package provides compatibility string types from Julia 0.5 (and earlier), which were removed in subsequent versions, including:
 
@@ -18,10 +18,8 @@ The LegacyStrings package provides compatibility string types from Julia 0.5 (an
 
 LegacyStrings also defines and exports converter functions for these types, i.e.:
 
-- `ascii`: convert to `ASCIIString`; on 0.5 since `Base` exports an `ascii` function as well, you must explicitly do `import LegacyStrings: ascii` or write `LegacyStrings.ascii` in order to use this function rather than `Base.ascii`.
+- `ascii`: convert to `ASCIIString`; since `Base` exports an `ascii` function as well, you must explicitly do `import LegacyStrings: ascii` or write `LegacyStrings.ascii` in order to use this function rather than `Base.ascii`.
 - `utf8`: convert to `UTF8String`.
 - `utf16`: convert to `UTF16String`.
 - `utf32`: convert to `UTF32String`.
 - `wstring`: alias for `utf16` or `utf32` according to what `WString` is an alias to.
-
-The definitions of the above types and functions are conditional on the version of Julia being used so that you can do `using LegacyStrings` unconditionally and be guaranteed that e.g. `LegacyStrings.ASCIIString` is an `ASCIIString` type that will behave as expect in Julia 0.4 or earlier.
