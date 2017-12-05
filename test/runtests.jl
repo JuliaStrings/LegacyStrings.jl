@@ -573,7 +573,7 @@ let
                 r = reverse(s)
                 @test r == rs
                 ri = search(r, c)
-                @test c == rs[reverseind(rs, ri)] == r[ri]
+                @test c == s[reverseind(s, ri)] == r[ri]
             end
         end
     end
