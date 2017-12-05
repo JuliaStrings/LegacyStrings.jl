@@ -9,6 +9,7 @@ export
     ByteString,
     ASCIIString,
     RepString,
+    RevString,
     UTF8String,
     UTF16String,
     UTF32String,
@@ -103,5 +104,11 @@ using Compat
         using Base: RepString
     else
         include("rep.jl")
+    end
+
+    if isdefined(Base, :RevString)
+        using Base: RevString
+    else
+        include("rev.jl")
     end
 end # module
