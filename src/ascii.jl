@@ -2,8 +2,19 @@
 
 ## required core functionality ##
 
-endof(s::ASCIIString) = length(s.data)
+lastindex(s::ASCIIString) = length(s.data)
 getindex(s::ASCIIString, i::Int) = (x=s.data[i]; ifelse(x < 0x80, Char(x), '\ufffd'))
+
+codeunit(s::ASCIIString) = UInt8
+ncodeunits(s::ASCIIString) = length(s.data)
+
+if isdefined(Base, :iterate)
+    import Base: iterate
+    function iterate(s::ASCIIString, i::Int = firstindex(s))
+        i > ncodeunits(s) && return nothing
+        return next(s, i)
+    end
+end
 
 ## overload methods for efficiency ##
 
@@ -29,7 +40,7 @@ function string(c::ASCIIString...)
     for s in c
         n += length(s.data)
     end
-    v = Vector{UInt8}(n)
+    v = Vector{UInt8}(undef, n)
     o = 1
     for s in c
         ls = length(s.data)
@@ -97,11 +108,14 @@ write(io::IO, s::ASCIIString) = write(io, s.data)
 
 ascii(x) = convert(ASCIIString, x)
 convert(::Type{ASCIIString}, s::ASCIIString) = s
-convert(::Type{ASCIIString}, s::String) = ascii(Vector{UInt8}(s))
+convert(::Type{ASCIIString}, s::String) = ascii(codeunits(s))
 convert(::Type{ASCIIString}, s::UTF8String) = ascii(s.data)
 convert(::Type{ASCIIString}, a::Vector{UInt8}) = begin
     isvalid(ASCIIString,a) || throw(ArgumentError("invalid ASCII sequence"))
     return ASCIIString(a)
+end
+if isdefined(Base, :codeunits)
+    convert(::Type{ASCIIString}, a::Base.CodeUnits{UInt8,String}) = convert(ASCIIString, Vector{UInt8}(a))
 end
 
 ascii(p::Ptr{UInt8}) =

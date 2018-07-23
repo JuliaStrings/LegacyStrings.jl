@@ -59,7 +59,7 @@ Input Arguments:
 Optional Input Arguments:
 
 * `pos`    start position (defaults to 1)
-* `endpos` end position   (defaults to `endof(dat)`)
+* `endpos` end position   (defaults to `lastindex(dat)`)
 
 Keyword Arguments:
 
@@ -79,7 +79,7 @@ function unsafe_checkstring end
 
 function unsafe_checkstring(dat::AbstractVector{UInt8},
                       pos = 1,
-                      endpos = endof(dat)
+                      endpos = length(dat)
                       ;
                       accept_long_null  = true,
                       accept_surrogates = true,
@@ -183,12 +183,12 @@ function unsafe_checkstring(dat::AbstractVector{UInt8},
     return totalchar, flags, num4byte, num3byte, num2byte
 end
 
-@compat AbstractString1632{Tel<:Union{UInt16,UInt32}} = Union{AbstractVector{Tel}, AbstractString}
+AbstractString1632{Tel<:Union{UInt16,UInt32}} = Union{AbstractVector{Tel}, AbstractString}
 
 function unsafe_checkstring(
                       dat::AbstractString1632,
                       pos = 1,
-                      endpos = endof(dat)
+                      endpos = lastindex(dat)
                       ;
                       accept_long_null  = true,
                       accept_surrogates = true,
@@ -246,7 +246,7 @@ Input Arguments:
 Optional Input Arguments:
 
 * `startpos` start position (defaults to 1)
-* `endpos`   end position   (defaults to `endof(dat)`)
+* `endpos`   end position   (defaults to `lastindex(dat)`)
 
 Keyword Arguments:
 
@@ -265,18 +265,19 @@ Throws:
 function checkstring end
 
 # No need to check bounds if using defaults
-checkstring(dat; kwargs...) = unsafe_checkstring(dat, 1, endof(dat); kwargs...)
+checkstring(dat::AbstractString; kwargs...) = unsafe_checkstring(dat, 1, lastindex(dat); kwargs...)
+checkstring(dat; kwargs...) = unsafe_checkstring(dat, 1, length(dat); kwargs...)
 
 # Make sure that beginning and end positions are bounds checked
-function checkstring(dat, startpos, endpos = endof(dat); kwargs...)
+function checkstring(dat, startpos, endpos = lastindex(dat); kwargs...)
     checkbounds(dat,startpos)
     checkbounds(dat,endpos)
     endpos < startpos && throw(ArgumentError("End position ($endpos) is less than start position ($startpos)"))
     unsafe_checkstring(dat, startpos, endpos; kwargs...)
 end
 
-isvalid{T<:Union{ASCIIString,UTF8String,UTF16String,UTF32String}}(str::T) = isvalid(T, str.data)
-isvalid{T<:Union{ASCIIString,UTF8String,UTF16String,UTF32String}}(::Type{T}, str::T) = isvalid(T, str.data)
+isvalid(str::T) where {T<:Union{ASCIIString,UTF8String,UTF16String,UTF32String}} = isvalid(T, str.data)
+isvalid(::Type{T}, str::T) where {T<:Union{ASCIIString,UTF8String,UTF16String,UTF32String}} = isvalid(T, str.data)
 
 byte_string_classify(data::Vector{UInt8}) =
     ccall(:u8_isvalid, Int32, (Ptr{UInt8}, Int), data, length(data))
@@ -291,7 +292,7 @@ isvalid(::Type{UTF8String}, s::Union{Vector{UInt8},ByteString}) = byte_string_cl
 bytestring() = ASCIIString("")
 function bytestring(s::AbstractString...)
     str = Base.print_to_string(s...)
-    data = Vector{UInt8}(str)
+    data = Vector{UInt8}(codeunits(str))
     isvalid(ASCIIString, data) ? ASCIIString(data) : UTF8String(data)
 end
 bytestring(s::Vector{UInt8}) = bytestring(String(s))

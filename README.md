@@ -5,6 +5,7 @@
 
 [![Julia 0.5 Status](http://pkg.julialang.org/badges/LegacyStrings_0.5.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.5)
 [![Julia 0.6 Status](http://pkg.julialang.org/badges/LegacyStrings_0.6.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.6)
+[![Julia 0.7 Status](http://pkg.julialang.org/badges/LegacyStrings_0.7.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.7)
 
 The LegacyStrings package provides compatibility string types from Julia 0.5 (and earlier), which were removed in subsequent versions, including:
 

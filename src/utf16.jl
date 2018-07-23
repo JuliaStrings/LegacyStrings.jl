@@ -1,9 +1,9 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
 # Quickly copy and set trailing \0
-@inline function fast_utf_copy{S <: Union{UTF16String, UTF32String}, T <: Union{UInt16, UInt32}}(
-                              ::Type{S}, ::Type{T}, len, dat, flag::Bool=false)
-    S(setindex!(copy!(Vector{T}(len+1), 1, dat, 1, flag ? len : len+1), 0, len+1))
+@inline function fast_utf_copy(::Type{S}, ::Type{T}, len, dat, flag::Bool=false) where
+                              {S <: Union{UTF16String, UTF32String}, T <: Union{UInt16, UInt32}}
+    S(setindex!(copyto!(Vector{T}(undef, len+1), 1, dat, 1, flag ? len : len+1), 0, len+1))
 end
 
 # Get rest of character ch from 3-byte UTF-8 sequence in dat
@@ -41,12 +41,15 @@ function length(s::UTF16String)
     cnum
 end
 
-function endof(s::UTF16String)
+function lastindex(s::UTF16String)
     d = s.data
     i = length(d) - 1
     i == 0 && return i
     return is_surrogate_codeunit(d[i]) ? i-1 : i
 end
+
+codeunit(s::UTF16String) = UInt16
+ncodeunits(s::UTF16String) = length(s.data) - 1
 
 get_supplementary(lead::Unsigned, trail::Unsigned) = (UInt32(lead-0xd7f7)<<10 + trail)
 
@@ -59,6 +62,13 @@ function next(s::UTF16String, i::Int)
     ct = s.data[i+1]
     !is_surrogate_trail(ct) && throw((UTF_ERR_NOT_TRAIL, i, ch))
     Char(get_supplementary(ch, ct)), i+2
+end
+
+if isdefined(Base, :iterate)
+    function iterate(s::UTF16String, i::Int = firstindex(s))
+        i > ncodeunits(s) && return nothing
+        return next(s, i)
+    end
 end
 
 function reverseind(s::UTF16String, i::Integer)
@@ -86,6 +96,17 @@ end
 
 sizeof(s::UTF16String) = sizeof(s.data) - sizeof(UInt16)
 
+function isvalid(s::UTF16String, i::Int)
+    (i < 1 || i > ncodeunits(s)) && return false
+    if is_surrogate_lead(s.data[i]) && is_surrogate_trail(s.data[i+1])
+        return true
+    elseif is_surrogate_codeunit(s.data[i])
+        return false
+    else
+        return true
+    end
+end
+
 function isvalid(::Type{UTF16String}, data::AbstractArray{UInt16})
     i = 1
     n = length(data) # this may include NULL termination; that's okay
@@ -103,7 +124,7 @@ end
 
 function convert(::Type{UTF16String}, str::AbstractString)
     len, flags, num4byte = unsafe_checkstring(str)
-    buf = Vector{UInt16}(len+num4byte+1)
+    buf = Vector{UInt16}(undef, len+num4byte+1)
     out = 0
     @inbounds for ch in str
         c = UInt32(ch)
@@ -126,10 +147,10 @@ function convert(::Type{UTF16String}, str::UTF8String)
     # Check that is correct UTF-8 encoding and get number of words needed
     len, flags, num4byte = unsafe_checkstring(dat)
     len += num4byte
-    buf = Vector{UInt16}(len+1)
+    buf = Vector{UInt16}(undef, len+1)
     @inbounds buf[len+1] = 0
     # Optimize case where no characters > 0x7f
-    flags == 0 && @inbounds return UTF16String(copy!(buf, dat))
+    flags == 0 && @inbounds return UTF16String(copyto!(buf, dat))
     out = 0
     pos = 0
     @inbounds while out < len
@@ -163,7 +184,7 @@ function convert(::Type{UTF8String}, str::UTF16String)
     len <= 1 && return empty_utf8
     # get number of bytes to allocate
     len, flags, num4byte, num3byte, num2byte = unsafe_checkstring(dat, 1, len-1)
-    flags == 0 && @inbounds return UTF8String(copy!(Vector{UInt8}(len), 1, dat, 1, len))
+    flags == 0 && @inbounds return UTF8String(copyto!(Vector{UInt8}(undef, len), 1, dat, 1, len))
     return encode_to_utf8(UInt16, dat, len + num2byte + num3byte*2 + num4byte*3)
 end
 
@@ -180,7 +201,7 @@ Returns:
 *   `UTF16String`
 """
 function encode_to_utf16(dat, len)
-    buf = Vector{UInt16}(len)
+    buf = Vector{UInt16}(undef, len)
     @inbounds buf[len] = 0 # NULL termination
     out = 0
     pos = 0
@@ -206,7 +227,7 @@ convert(::Type{Array{UInt16}},  str::UTF16String) = str.data
 
 convert(::Type{UTF16String}, str::UTF16String)    = str
 
-unsafe_convert{T<:Union{Int16,UInt16}}(::Type{Ptr{T}}, s::UTF16String) =
+unsafe_convert(::Type{Ptr{T}}, s::UTF16String) where {T<:Union{Int16,UInt16}} =
     convert(Ptr{T}, pointer(s))
 
 convert(T::Type{UTF16String}, data::AbstractArray{UInt16}) =
@@ -237,7 +258,7 @@ function convert(T::Type{UTF16String}, bytes::AbstractArray{UInt8})
         swap = false
     end
     len = nb ÷ 2 - offset
-    d = Vector{UInt16}(len + 1)
+    d = Vector{UInt16}(undef, len + 1)
     if swap
         @inbounds for i in 1:len
             ib = i + offset
@@ -246,7 +267,7 @@ function convert(T::Type{UTF16String}, bytes::AbstractArray{UInt8})
             d[i] = (UInt16(bhi) << 8) | blo
         end
     else
-        unsafe_copy!(Ptr{UInt8}(pointer(d)), pointer(bytes, offset * 2 + 1), len * 2)
+        unsafe_copyto!(Ptr{UInt8}(pointer(d)), pointer(bytes, offset * 2 + 1), len * 2)
     end
     d[end] = 0 # NULL terminate
     !isvalid(UTF16String, d) && throw(UnicodeError(UTF_ERR_INVALID_16,0,0))
