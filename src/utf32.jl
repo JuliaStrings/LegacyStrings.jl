@@ -4,8 +4,18 @@ UTF32String(data::Vector{Char}) = UTF32String(reinterpret(UInt32, data))
 
 # UTF-32 basic functions
 next(s::UTF32String, i::Int) = (Char(s.data[i]), i+1)
-endof(s::UTF32String) = length(s.data) - 1
+lastindex(s::UTF32String) = length(s.data) - 1
 length(s::UTF32String) = length(s.data) - 1
+
+codeunit(s::UTF32String) = UInt32
+ncodeunits(s::UTF32String) = length(s.data)
+
+if isdefined(Base, :iterate)
+    function iterate(s::UTF32String, i::Int = firstindex(s))
+        i > length(s) && return nothing
+        return next(s, i)
+    end
+end
 
 reverse(s::UTF32String) = UTF32String(reverse!(copy(s.data), 1, length(s)))
 
@@ -18,7 +28,7 @@ convert(::Type{UTF32String}, s::UTF32String) = s
 
 function convert(::Type{UTF32String}, str::AbstractString)
     len, flags = unsafe_checkstring(str)
-    buf = Vector{UInt32}(len+1)
+    buf = Vector{UInt32}(undef, len+1)
     out = 0
     @inbounds for ch in str ; buf[out += 1] = ch ; end
     @inbounds buf[out + 1] = 0 # NULL termination
@@ -32,7 +42,7 @@ function convert(::Type{UTF8String},  str::UTF32String)
     len <= 1 && return empty_utf8
     # get number of bytes to allocate
     len, flags, num4byte, num3byte, num2byte = unsafe_checkstring(dat, 1, len-1)
-    flags == 0 && @inbounds return UTF8String(copy!(Vector{UInt8}(len), 1, dat, 1, len))
+    flags == 0 && @inbounds return UTF8String(copyto!(Vector{UInt8}(undef, len), 1, dat, 1, len))
     return encode_to_utf8(UInt32, dat, len + num2byte + num3byte*2 + num4byte*3)
 end
 
@@ -45,7 +55,7 @@ function convert(::Type{UTF32String}, str::UTF8String)
     # Optimize case where no characters > 0x7f
     flags == 0 && @inbounds return fast_utf_copy(UTF32String, UInt32, len, dat, true)
     # has multi-byte UTF-8 sequences
-    buf = Vector{UInt32}(len+1)
+    buf = Vector{UInt32}(undef, len+1)
     @inbounds buf[len+1] = 0 # NULL termination
     local ch::UInt32, surr::UInt32
     out = 0
@@ -89,9 +99,9 @@ function convert(::Type{UTF32String}, str::UTF16String)
     # get number of words to create
     len, flags, num4byte = unsafe_checkstring(dat, 1, len>>>1)
     # No surrogate pairs, do optimized copy
-    (flags & UTF_UNICODE4) == 0 && @inbounds return UTF32String(copy!(Vector{UInt32}(len), dat))
+    (flags & UTF_UNICODE4) == 0 && @inbounds return UTF32String(copyto!(Vector{UInt32}(undef, len), dat))
     local ch::UInt32
-    buf = Vector{UInt32}(len)
+    buf = Vector{UInt32}(undef, len)
     out = 0
     pos = 0
     @inbounds while out < len
@@ -111,7 +121,7 @@ function convert(::Type{UTF16String}, str::UTF32String)
     # get number of words to allocate
     len, flags, num4byte = unsafe_checkstring(dat, 1, len>>>2)
     # optimized path, no surrogates
-    num4byte == 0 && @inbounds return UTF16String(copy!(Vector{UInt16}(len), dat))
+    num4byte == 0 && @inbounds return UTF16String(copyto!(Vector{UInt16}(undef, len), dat))
     return encode_to_utf16(dat, len + num4byte)
 end
 
@@ -130,12 +140,12 @@ convert(::Type{UTF32String}, data::AbstractVector{Int32}) =
 convert(::Type{UTF32String}, data::AbstractVector{Char}) =
     convert(UTF32String, map(UInt32, data))
 
-convert{T<:AbstractString, S<:Union{UInt32,Char,Int32}}(::Type{T}, v::AbstractVector{S}) =
+convert(::Type{T}, v::AbstractVector{S}) where {T<:AbstractString, S<:Union{UInt32,Char,Int32}} =
     convert(T, utf32(v))
 
 # specialize for performance reasons:
-function convert{T<:ByteString, S<:Union{UInt32,Char,Int32}}(::Type{T}, data::AbstractVector{S})
-    s = IOBuffer(Vector{UInt8}(length(data)), true, true)
+function convert(::Type{T}, data::AbstractVector{S}) where {T<:ByteString, S<:Union{UInt32,Char,Int32}}
+    s = IOBuffer(Vector{UInt8}(undef, length(data)), read=true, write=true)
     truncate(s,0)
     for x in data
         print(s, Char(x))
@@ -146,7 +156,7 @@ end
 convert(::Type{Vector{UInt32}}, str::UTF32String) = str.data
 convert(::Type{Array{UInt32}},  str::UTF32String) = str.data
 
-unsafe_convert{T<:Union{UInt32,Int32,Char}}(::Type{Ptr{T}}, s::UTF32String) =
+unsafe_convert(::Type{Ptr{T}}, s::UTF32String) where {T<:Union{UInt32,Int32,Char}} =
     convert(Ptr{T}, pointer(s))
 
 function convert(T::Type{UTF32String}, bytes::AbstractArray{UInt8})
@@ -168,7 +178,7 @@ function convert(T::Type{UTF32String}, bytes::AbstractArray{UInt8})
         swap = false
     end
     len = nb ÷ 4 - offset
-    d = Vector{UInt32}(len + 1)
+    d = Vector{UInt32}(undef, len + 1)
     if swap
         @inbounds for i in 1:len
             ib = i + offset
@@ -179,7 +189,7 @@ function convert(T::Type{UTF32String}, bytes::AbstractArray{UInt8})
             d[i] = (b1 << 24) | (b2 << 16) | (b3 << 8) | b4
         end
     else
-        unsafe_copy!(Ptr{UInt8}(pointer(d)), pointer(bytes, offset * 4 + 1), len * 4)
+        unsafe_copyto!(Ptr{UInt8}(pointer(d)), pointer(bytes, offset * 4 + 1), len * 4)
     end
     d[end] = 0 # NULL terminate
     UTF32String(d)
@@ -221,7 +231,7 @@ end
 # Definitions for C compatible strings, that don't allow embedded
 # '\0', and which are terminated by a '\0'
 containsnul(s::ByteString) = containsnul(unsafe_convert(Ptr{Cchar}, s), sizeof(s))
-containsnul(s::Union{UTF16String,UTF32String}) = findfirst(s.data, 0) != length(s.data)
+containsnul(s::Union{UTF16String,UTF32String}) = findfirst(isequal(0), s.data) != length(s.data)
 
 if sizeof(Cwchar_t) == 2
     const WString = UTF16String
@@ -247,10 +257,10 @@ pointer(x::ByteString, i::Integer) = pointer(x.data)+(i-1)
 pointer(x::Union{UTF16String,UTF32String}, i::Integer) = pointer(x)+(i-1)*sizeof(eltype(x.data))
 
 # pointer conversions of SubString of ASCII/UTF8/UTF16/UTF32:
-pointer{T<:ByteString}(x::SubString{T}) = pointer(x.string.data) + x.offset
-pointer{T<:ByteString}(x::SubString{T}, i::Integer) = pointer(x.string.data) + x.offset + (i-1)
-pointer{T<:Union{UTF16String,UTF32String}}(x::SubString{T}) = pointer(x.string.data) + x.offset*sizeof(eltype(x.string.data))
-pointer{T<:Union{UTF16String,UTF32String}}(x::SubString{T}, i::Integer) = pointer(x.string.data) + (x.offset + (i-1))*sizeof(eltype(x.string.data))
+pointer(x::SubString{T}) where {T<:ByteString} = pointer(x.string.data) + x.offset
+pointer(x::SubString{T}, i::Integer) where {T<:ByteString} = pointer(x.string.data) + x.offset + (i-1)
+pointer(x::SubString{T}) where {T<:Union{UTF16String,UTF32String}} = pointer(x.string.data) + x.offset*sizeof(eltype(x.string.data))
+pointer(x::SubString{T}, i::Integer) where {T<:Union{UTF16String,UTF32String}} = pointer(x.string.data) + (x.offset + (i-1))*sizeof(eltype(x.string.data))
 
 """
     utf32(s)
