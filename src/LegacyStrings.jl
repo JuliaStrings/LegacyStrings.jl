@@ -25,22 +25,17 @@ import Base:
     convert,
     getindex,
     isvalid,
-    lcfirst,
     length,
     lowercase,
     map,
-    next,
     nextind,
     pointer,
     prevind,
     reverse,
     reverseind,
-    rsearch,
-    search,
     show,
     sizeof,
     string,
-    ucfirst,
     unsafe_convert,
     uppercase,
     write
@@ -51,6 +46,26 @@ import Compat:
     lastindex,
     codeunit,
     ncodeunits
+
+if isdefined(Base, :lcfirst)
+    import Base: lcfirst
+end
+
+if isdefined(Base, :next)
+    import Base: next
+end
+
+if isdefined(Base, :rsearch)
+    import Base: rsearch
+end
+
+if isdefined(Base, :search)
+    import Base: search
+end
+
+if isdefined(Base, :ucfirst)
+    import Base: ucfirst
+end
 
 if isdefined(Base, :iterate)
     import Base: iterate
