@@ -207,7 +207,11 @@ let ch = 0x10000
 end
 
 let str = UTF8String(b"this is a test\xed\x80")
-    @test iterate(str, 15) == ('\ufffd', 16)
+    @static if VERSION < v"0.7-"
+        @test next(str, 15) == ('\ufffd', 16)
+    else
+        @test iterate(str, 15) == ('\ufffd', 16)
+    end
     @test_throws BoundsError getindex(str, 0:3)
     @test_throws BoundsError getindex(str, 17:18)
     @test_throws BoundsError getindex(str, 2:17)
@@ -544,8 +548,13 @@ let
 
     @test lastindex(srep) == 7
 
-    @test iterate(srep, 3) == ('β',5)
-    @test iterate(srep, 7) == ('β',9)
+    @static if VERSION < v"0.7-"
+        @test next(srep, 3) == ('β',5)
+        @test next(srep, 7) == ('β',9)
+    else
+        @test iterate(srep, 3) == ('β',5)
+        @test iterate(srep, 7) == ('β',9)
+    end
 
     @test srep[7] == 'β'
     @static if VERSION < v"0.7.0-DEV.2924"

@@ -48,7 +48,7 @@ import Compat:
     ncodeunits
 
 
-if VERSION <= v"0.7-"
+if VERSION < v"0.7-"
     import Base: lcfirst
     import Base: next
     import Base: rsearch
