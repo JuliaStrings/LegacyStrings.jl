@@ -47,41 +47,21 @@ import Compat:
     codeunit,
     ncodeunits
 
-if isdefined(Base, :lcfirst)
+
+if VERSION <= v"0.7-"
     import Base: lcfirst
-end
-
-if isdefined(Base, :next)
     import Base: next
-end
-
-if isdefined(Base, :rsearch)
     import Base: rsearch
-end
-
-if isdefined(Base, :search)
     import Base: search
-end
-
-if isdefined(Base, :ucfirst)
     import Base: ucfirst
-end
-
-if isdefined(Base, :iterate)
-    import Base: iterate
-end
-
-if isdefined(Base, :UnicodeError)
     import Base: UnicodeError
-else
-    include("unicodeerror.jl")
-end
-
-if isdefined(Base, :DirectIndexString)
     using Base: DirectIndexString
 else
+    import Base: iterate
+    include("unicodeerror.jl")
     include("directindex.jl")
 end
+
 
 struct ASCIIString <: DirectIndexString
     data::Vector{UInt8}

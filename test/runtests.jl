@@ -6,7 +6,6 @@ using Compat: view, String
 using LegacyStrings
 using LegacyStrings: ASCIIString, UTF8String # override Compat's version
 import LegacyStrings:
-    ascii,
     checkstring,
     UnicodeError,
     UTF_ERR_SHORT
@@ -208,13 +207,13 @@ let ch = 0x10000
 end
 
 let str = UTF8String(b"this is a test\xed\x80")
-    @test next(str, 15) == ('\ufffd', 16)
+    @test iterate(str, 15) == ('\ufffd', 16)
     @test_throws BoundsError getindex(str, 0:3)
     @test_throws BoundsError getindex(str, 17:18)
     @test_throws BoundsError getindex(str, 2:17)
     @test_throws UnicodeError getindex(str, 16:17)
     # @test string(Char(0x110000)) == "\ufffd"
-    sa = SubString{ASCIIString}(ascii("This is a silly test"), 1, 14)
+    sa = SubString{ASCIIString}(LegacyStrings.ascii("This is a silly test"), 1, 14)
     s8 = convert(SubString{UTF8String}, sa)
     @test typeof(s8) == SubString{UTF8String}
     @test s8 == "This is a sill"
@@ -283,7 +282,7 @@ function tstcvt(strUTF8::UTF8String, strUTF16::UTF16String, strUTF32::UTF32Strin
 end
 
 # Create some ASCII, UTF8, UTF16, and UTF32 strings
-strAscii = ascii("abcdefgh")
+strAscii = LegacyStrings.ascii("abcdefgh")
 strA_UTF8 = utf8(("abcdefgh\uff")[1:8])
 strL_UTF8 = utf8("abcdef\uff\uff")
 str2_UTF8 = utf8("abcd\uff\uff\u7ff\u7ff")
@@ -464,7 +463,7 @@ end
 @test reverse(utf32("abcd \uff\u7ff\u7fff\U7ffff")) == utf32("\U7ffff\u7fff\u7ff\uff dcba")
 
 # Test pointer() functions
-let str = ascii("this ")
+let str = LegacyStrings.ascii("this ")
     u8  = utf8(str)
     u16 = utf16(str)
     u32 = utf32(str)
@@ -545,8 +544,8 @@ let
 
     @test lastindex(srep) == 7
 
-    @test next(srep, 3) == ('β',5)
-    @test next(srep, 7) == ('β',9)
+    @test iterate(srep, 3) == ('β',5)
+    @test iterate(srep, 7) == ('β',9)
 
     @test srep[7] == 'β'
     @static if VERSION < v"0.7.0-DEV.2924"
