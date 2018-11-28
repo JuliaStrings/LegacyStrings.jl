@@ -25,22 +25,17 @@ import Base:
     convert,
     getindex,
     isvalid,
-    lcfirst,
     length,
     lowercase,
     map,
-    next,
     nextind,
     pointer,
     prevind,
     reverse,
     reverseind,
-    rsearch,
-    search,
     show,
     sizeof,
     string,
-    ucfirst,
     unsafe_convert,
     uppercase,
     write
@@ -52,21 +47,21 @@ import Compat:
     codeunit,
     ncodeunits
 
-if isdefined(Base, :iterate)
-    import Base: iterate
-end
 
-if isdefined(Base, :UnicodeError)
+if VERSION < v"0.7-"
+    import Base: lcfirst
+    import Base: next
+    import Base: rsearch
+    import Base: search
+    import Base: ucfirst
     import Base: UnicodeError
-else
-    include("unicodeerror.jl")
-end
-
-if isdefined(Base, :DirectIndexString)
     using Base: DirectIndexString
 else
+    import Base: iterate
+    include("unicodeerror.jl")
     include("directindex.jl")
 end
+
 
 struct ASCIIString <: DirectIndexString
     data::Vector{UInt8}
