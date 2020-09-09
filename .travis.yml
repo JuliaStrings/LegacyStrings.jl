@@ -9,7 +9,8 @@ arch:
   - x86
 julia:
   - 0.6
-  - 0.7
+  - 1.0  # LTS (Long Term Stable)
+  - 1    # Latest release
   - nightly
 notifications:
   email: false
