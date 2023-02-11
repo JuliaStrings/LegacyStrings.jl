@@ -40,6 +40,11 @@ function next(s::RepString, i::Int)
 end
 
 codeunit(s::RepString) = codeunit(s.string)
+@propagate_inbounds function codeunit(s::RepString, i::Integer)
+    @boundscheck checkbounds(codeunits(s), i)
+    @inbounds codeunit(s.string, (i-1) % ncodeunits(s.string) + 1)
+end
+
 ncodeunits(s::RepString) = ncodeunits(s.string) * s.repeat
 
 if isdefined(Base, :iterate)

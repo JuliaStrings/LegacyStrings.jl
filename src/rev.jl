@@ -16,6 +16,15 @@ function next(s::RevString, i::Int)
 end
 
 codeunit(s::RevString) = codeunit(s.string)
+@propagate_inbounds function codeunit(s::RevString, i::Integer)
+    @boundscheck checkbounds(codeunits(s), i)
+    s = s.string
+    j = ncodeunits(s)-i+1
+    j0 = thisind(s, j)
+    j1 = nextind(s, j0)
+    @inbounds codeunit(s, j0+j1-j-1)
+end
+
 ncodeunits(s::RevString) = ncodeunits(s.string)
 
 if isdefined(Base, :iterate)
