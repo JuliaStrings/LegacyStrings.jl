@@ -1,8 +1,8 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
-struct RepString <: AbstractString
-    string::AbstractString
-    repeat::Integer
+struct RepString{T<:AbstractString} <: AbstractString
+    string::T
+    repeat::Int
 end
 
 function lastindex(s::RepString)

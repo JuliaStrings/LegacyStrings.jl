@@ -537,7 +537,7 @@ let
     @test sizeof(rs) == 6
     @test isascii(rs)
     @test convert(RepString, "foobar") == "foobar"
-    @test typeof(convert(RepString, "foobar")) == RepString
+    @test convert(RepString, "foobar") isa RepString
 
     srep = RepString("Σβ",2)
     s="Σβ"
