@@ -24,6 +24,7 @@ import Base:
     containsnul,
     convert,
     getindex,
+    isascii,
     isvalid,
     length,
     lowercase,

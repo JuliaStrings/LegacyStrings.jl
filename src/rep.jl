@@ -50,3 +50,5 @@ if isdefined(Base, :iterate)
 end
 
 convert(::Type{RepString}, s::AbstractString) = RepString(s,1)
+
+isascii(s::RepString) = iszero(s.repeat) || isascii(s.string)

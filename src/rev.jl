@@ -36,3 +36,5 @@ end
 
 reverse(s::RevString) = s.string
 reverseind(s::RevString, i::Integer) = lastindex(s) - i + 1
+
+isascii(s::RevString) = isascii(s.string)

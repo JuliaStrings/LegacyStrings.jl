@@ -100,6 +100,8 @@ end
 
 reverse(s::ASCIIString) = ASCIIString(reverse(s.data))
 
+isascii(::ASCIIString) = true
+
 ## outputing ASCII strings ##
 
 write(io::IO, s::ASCIIString) = write(io, s.data)

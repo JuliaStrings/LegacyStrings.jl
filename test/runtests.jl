@@ -591,3 +591,13 @@ let
         end
     end
 end
+
+
+## isascii ##
+
+for s in ["", "a", "â", "abcde", "abçde"]
+    isascii(s) && @test isascii(LegacyStrings.ascii(s))
+    @test isascii(s) == isascii(RepString(s, 3))
+    @test isascii(RepString(s, 0))
+    @test isascii(s) == isascii(RevString(s))
+end
