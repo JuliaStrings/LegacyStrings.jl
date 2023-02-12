@@ -20,6 +20,7 @@ end
 
 bytestring(s::ASCIIString) = s
 
+length(s::ASCIIString) = length(s.data)
 sizeof(s::ASCIIString) = sizeof(s.data)
 
 getindex(s::ASCIIString, r::Vector) = ASCIIString(getindex(s.data,r))
