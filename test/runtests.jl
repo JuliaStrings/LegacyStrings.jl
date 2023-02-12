@@ -601,3 +601,38 @@ for s in ["", "a", "â", "abcde", "abçde"]
     @test isascii(RepString(s, 0))
     @test isascii(s) == isascii(RevString(s))
 end
+
+
+## codeunit, codeunits and ncodeunits ##
+
+function test_codeunit(s0, s, to_str)
+    cu = codeunits(s)
+    @test length(cu) == ncodeunits(s)
+    @test_throws BoundsError cu[0]
+    @test_throws BoundsError cu[end+1]
+    @test s0 == to_str(collect(cu))
+end
+
+for s0 in ["", "Julia = Juliet", "Julia = Ιουλιέτα = 朱丽叶 ≠ 𐍈"]
+    for u in [identity, LegacyStrings.ascii, utf8, utf16, utf32]
+        u == LegacyStrings.ascii && !isascii(s0) && continue
+
+        s1 = u(s0)
+
+        # function to convert codeunits to the type of s1
+        to_str = u === identity ? String : (cu -> convert(typeof(s1), cu))
+
+        # ASCIIString, UTF8String, UTF16String, UTF32String
+        test_codeunit(s0, s1, to_str)
+
+        # RepString
+        for k in [0, 1, 3]
+            s2 = RepString(s1, k)
+            test_codeunit(s0^k, s2, to_str)
+        end
+
+        # RevString
+        s2 = RevString(s1)
+        test_codeunit(reverse(s0), s2, to_str)
+    end
+end
