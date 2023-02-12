@@ -593,6 +593,16 @@ let
 end
 
 
+# length
+
+for s in ["", "a", "â", "Julia", "줄리아"]
+    for u in [LegacyStrings.ascii, utf8, utf16, utf32]
+        u == LegacyStrings.ascii && !isascii(s) && continue
+        @test length(s) == length(u(s))
+    end
+end
+
+
 ## isascii ##
 
 for s in ["", "a", "â", "abcde", "abçde"]
