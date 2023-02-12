@@ -608,6 +608,7 @@ end
 function test_codeunit(s0, s, to_str)
     cu = codeunits(s)
     @test length(cu) == ncodeunits(s)
+    isempty(s) || @test codeunit(s, 1) isa codeunit(s)
     @test_throws BoundsError cu[0]
     @test_throws BoundsError cu[end+1]
     @test s0 == to_str(collect(cu))
