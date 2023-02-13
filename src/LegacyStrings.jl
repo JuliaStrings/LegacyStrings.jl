@@ -20,6 +20,8 @@ export
     utf32,
     wstring
 
+using Base: @propagate_inbounds
+
 import Base:
     containsnul,
     convert,
@@ -112,6 +114,11 @@ else
 end
 
 const AllLegacyStringTypes = Union{ASCIIString,UTF8String,UTF16String,UTF32String,RepString,RevString}
+
+@propagate_inbounds function codeunit(s::Union{ASCIIString,UTF8String,UTF16String,UTF32String}, i::Integer)
+    @boundscheck checkbounds(codeunits(s), i)
+    @inbounds s.data[i]
+end
 
 codeunit(s::SubString{<:AllLegacyStringTypes}) = codeunit(s.string)
 ncodeunits(s::SubString{<:AllLegacyStringTypes}) = isdefined(s, :ncodeunits) ? s.ncodeunits : s.endof

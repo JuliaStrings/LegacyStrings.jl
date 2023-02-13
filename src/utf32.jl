@@ -8,7 +8,7 @@ lastindex(s::UTF32String) = length(s.data) - 1
 length(s::UTF32String) = length(s.data) - 1
 
 codeunit(s::UTF32String) = UInt32
-ncodeunits(s::UTF32String) = length(s.data)
+ncodeunits(s::UTF32String) = length(s.data) - 1
 
 if isdefined(Base, :iterate)
     function iterate(s::UTF32String, i::Int = firstindex(s))
