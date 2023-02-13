@@ -211,7 +211,7 @@ convert(::Type{UTF8String}, s::ASCIIString) = UTF8String(s.data)
 convert(::Type{SubString{UTF8String}}, s::SubString{ASCIIString}) =
     SubString(utf8(s.string), s.offset+1, ncodeunits(s)+s.offset)
 
-function convert(::Type{UTF8String}, dat::Vector{UInt8})
+function convert(::Type{UTF8String}, dat::AbstractVector{UInt8})
     # handle zero length string quickly
     isempty(dat) && return empty_utf8
     # get number of bytes to allocate
@@ -286,10 +286,6 @@ function convert(::Type{UTF8String}, a::Vector{UInt8}, invalids_as::AbstractStri
     UTF8String(a)
 end
 convert(::Type{UTF8String}, s::AbstractString) = utf8(bytestring(s))
-
-if isdefined(Base, :CodeUnits)
-    convert(::Type{UTF8String}, s::Base.CodeUnits{UInt8,String}) = convert(UTF8String, Vector{UInt8}(s))
-end
 
 """
 Converts an already validated vector of `UInt16` or `UInt32` to a `UTF8String`
