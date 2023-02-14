@@ -647,3 +647,16 @@ for s0 in ["", "Julia = Juliet", "Julia = Ιουλιέτα = 朱丽叶 ≠ 𐍈"
         test_codeunit(reverse(s0), s2, to_str)
     end
 end
+
+
+# construction of strings via AbstractVector
+
+for s0 in ["", "Julia = Juliet", "Julia = Ιουλιέτα = 朱丽叶 ≠ 𐍈"]
+    for u in [LegacyStrings.ascii, utf8, utf16, utf32]
+        u == LegacyStrings.ascii && !isascii(s0) && continue
+        s = u(s0)
+        cu = codeunits(s)
+        @test s == u(cu)
+        @test s == u(view(cu, 1:length(cu)))
+    end
+end

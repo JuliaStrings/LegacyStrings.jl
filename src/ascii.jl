@@ -117,9 +117,7 @@ convert(::Type{ASCIIString}, a::Vector{UInt8}) = begin
     isvalid(ASCIIString,a) || throw(ArgumentError("invalid ASCII sequence"))
     return ASCIIString(a)
 end
-if isdefined(Base, :codeunits)
-    convert(::Type{ASCIIString}, a::Base.CodeUnits{UInt8,String}) = convert(ASCIIString, Vector{UInt8}(a))
-end
+convert(::Type{ASCIIString}, a::AbstractVector{UInt8}) = convert(ASCIIString, Vector{UInt8}(a))
 
 ascii(p::Ptr{UInt8}) =
     ascii(p, p == C_NULL ? Csize_t(0) : ccall(:strlen, Csize_t, (Ptr{UInt8},), p))
