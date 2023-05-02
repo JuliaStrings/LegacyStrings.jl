@@ -660,3 +660,16 @@ for s0 in ["", "Julia = Juliet", "Julia = Ιουλιέτα = 朱丽叶 ≠ 𐍈"
         @test s == u(view(cu, 1:length(cu)))
     end
 end
+
+# nextind/prevind, issue #52
+@testset "nextind/prevind" begin
+    s = ASCIIString("foobar")
+    @test nextind(s, 1) == nextind(s, Int8(1)) === 2
+    @test prevind(s, 2) == prevind(s, Int8(2)) === 1
+    @test nextind(s, 1, 0) == nextind(s, Int8(1), Int8(0)) === 1
+    @test prevind(s, 2, 0) == prevind(s, Int8(2), Int8(0)) === 2
+    @test nextind(s, 1, 3) === 4
+    @test prevind(s, 4, 3) === 1
+    @test_throws ArgumentError nextind(s, 1, -1)
+    @test_throws ArgumentError prevind(s, 2, -1)
+end
