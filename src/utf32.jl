@@ -1,6 +1,6 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
-UTF32String(data::Vector{Char}) = UTF32String(reinterpret(UInt32, data))
+UTF32String(data::AbstractVector{<:AbstractChar}) = convert(UTF32String, data)
 
 # UTF-32 basic functions
 next(s::UTF32String, i::Int) = (Char(s.data[i]), i+1)
@@ -137,10 +137,10 @@ end
 convert(::Type{UTF32String}, data::AbstractVector{Int32}) =
     convert(UTF32String, reinterpret(UInt32, convert(Vector{Int32}, data)))
 
-convert(::Type{UTF32String}, data::AbstractVector{Char}) =
+convert(::Type{UTF32String}, data::AbstractVector{<:AbstractChar}) =
     convert(UTF32String, map(UInt32, data))
 
-convert(::Type{T}, v::AbstractVector{S}) where {T<:AbstractString, S<:Union{UInt32,Char,Int32}} =
+convert(::Type{T}, v::AbstractVector{S}) where {T<:Union{ASCIIString,UTF16String}, S<:Union{UInt32,AbstractChar,Int32}} =
     convert(T, utf32(v))
 
 # specialize for performance reasons:
@@ -206,10 +206,11 @@ isvalid(str::Vector{Char}) = isvalid(UTF32String, str)
 utf32(x) = convert(UTF32String, x)
 
 utf32(p::Ptr{UInt32}, len::Integer) = utf32(unsafe_wrap(Array, p, len))
-utf32(p::Union{Ptr{Char}, Ptr{Int32}}, len::Integer) = utf32(convert(Ptr{UInt32}, p), len)
-function utf32(p::Union{Ptr{UInt32}, Ptr{Char}, Ptr{Int32}})
+utf32(p::Ptr{Int32}, len::Integer) = utf32(convert(Ptr{UInt32}, p), len)
+utf32(p::Ptr{Char}, len::Integer) = utf32(unsafe_wrap(Array, p, len))
+function utf32(p::Ptr{T}) where {T<:Union{UInt32,Char,Int32}}
     len = 0
-    while unsafe_load(p, len+1) != 0; len += 1; end
+    while unsafe_load(p, len+1) != T(0); len += 1; end
     utf32(p, len)
 end
 
@@ -223,7 +224,7 @@ function map(f, s::UTF32String)
         if !isa(c2, Char)
             throw(UnicodeError(UTF_ERR_MAP_CHAR, 0, 0))
         end
-        out[i] = (c2::Char)
+        out[i] = UInt32(c2::Char)
     end
     UTF32String(out)
 end
@@ -273,7 +274,7 @@ Note that the resulting `UTF32String` data is terminated by the NUL codepoint (3
 which is not treated as a character in the string (so that it is mostly invisible in Julia);
 this allows the string to be passed directly to external functions requiring NUL-terminated
 data. This NUL is appended automatically by the `utf32(s)` conversion function. If you have
-a `Char` or `UInt32` array `A` that is already NUL-terminated UTF-32 data, then you can
+a `UInt32` array `A` that is already NUL-terminated UTF-32 data, then you can
 instead use `UTF32String(A)` to construct the string without making a copy of the data and
 treating the NUL as a terminator rather than as part of the string.
 """

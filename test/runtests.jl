@@ -585,7 +585,12 @@ for s in ["", "a", "â", "Julia", "줄리아"]
     for u in [LegacyStrings.ascii, utf8, utf16, utf32]
         u == LegacyStrings.ascii && !isascii(s) && continue
         @test length(s) == length(u(s))
+        @test map(uppercase, s) == map(uppercase, u(s))
     end
+    c = collect(s)
+    c0 = [c; Char(0)]
+    @test utf32(c) == UTF32String(c) == s
+    GC.@preserve c0 @test utf32(pointer(c0)) == s
 end
 
 
