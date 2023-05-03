@@ -2,11 +2,7 @@ name = "LegacyStrings"
 uuid = "1b4a561d-cfcb-5daf-8433-43fcf8b4bea3"
 version = "1.1"
 
-[deps]
-Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
-
 [compat]
-Compat = "0.67, 0.68, 0.69, 0.70, 1, 2, 3, 4"
 julia = "1"
 
 [extras]
