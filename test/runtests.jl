@@ -1,8 +1,6 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
-using Compat
-using Compat.Test
-using Compat: view, String
+using Test
 using LegacyStrings
 using LegacyStrings: ASCIIString, UTF8String # override Compat's version
 import LegacyStrings:
@@ -207,11 +205,8 @@ let ch = 0x10000
 end
 
 let str = UTF8String(b"this is a test\xed\x80")
-    @static if VERSION < v"0.7-"
-        @test next(str, 15) == ('\ufffd', 16)
-    else
-        @test iterate(str, 15) == ('\ufffd', 16)
-    end
+    @test iterate(str, 15) == ('\ufffd', 16)
+
     @test_throws BoundsError getindex(str, 0:3)
     @test_throws BoundsError getindex(str, 17:18)
     @test_throws BoundsError getindex(str, 2:17)
@@ -548,20 +543,11 @@ let
 
     @test lastindex(srep) == 7
 
-    @static if VERSION < v"0.7-"
-        @test next(srep, 3) == ('β',5)
-        @test next(srep, 7) == ('β',9)
-    else
-        @test iterate(srep, 3) == ('β',5)
-        @test iterate(srep, 7) == ('β',9)
-    end
+    @test iterate(srep, 3) == ('β',5)
+    @test iterate(srep, 7) == ('β',9)
 
     @test srep[7] == 'β'
-    @static if VERSION < v"0.7.0-DEV.2924"
-        @test_throws BoundsError srep[8]
-    else
-        @test_throws StringIndexError srep[8]
-    end
+    @test_throws StringIndexError srep[8]
 end
 
 

@@ -1,7 +1,5 @@
 # This file includes code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
-__precompile__(true)
-
 module LegacyStrings
 
 export
@@ -23,14 +21,18 @@ export
 using Base: @propagate_inbounds
 
 import Base:
+    codeunit,
     containsnul,
     convert,
     getindex,
     isascii,
     isvalid,
+    iterate,
+    lastindex,
     length,
     lowercase,
     map,
+    ncodeunits,
     nextind,
     pointer,
     prevind,
@@ -43,28 +45,8 @@ import Base:
     uppercase,
     write
 
-using Compat
-using Compat: IOBuffer
-import Compat:
-    lastindex,
-    codeunit,
-    ncodeunits
-
-
-if VERSION < v"0.7-"
-    import Base: lcfirst
-    import Base: next
-    import Base: rsearch
-    import Base: search
-    import Base: ucfirst
-    import Base: UnicodeError
-    using Base: DirectIndexString
-else
-    import Base: iterate
-    include("unicodeerror.jl")
-    include("directindex.jl")
-end
-
+include("unicodeerror.jl")
+include("directindex.jl")
 
 struct ASCIIString <: DirectIndexString
     data::Vector{UInt8}

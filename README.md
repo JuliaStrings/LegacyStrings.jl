@@ -1,11 +1,6 @@
 # LegacyStrings
 
-[![Travis CI Build Status](https://travis-ci.org/JuliaStrings/LegacyStrings.jl.svg?branch=master)](https://travis-ci.org/JuliaStrings/LegacyStrings.jl)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/ib52329urgg62jai?svg=true)](https://ci.appveyor.com/project/nalimilan/legacystrings-jl)
-
-[![Julia 0.5 Status](http://pkg.julialang.org/badges/LegacyStrings_0.5.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.5)
-[![Julia 0.6 Status](http://pkg.julialang.org/badges/LegacyStrings_0.6.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.6)
-[![Julia 0.7 Status](http://pkg.julialang.org/badges/LegacyStrings_0.7.svg)](http://pkg.julialang.org/?pkg=LegacyStrings&ver=0.7)
+[![CI](https://github.com/JuliaStrings/LegacyStrings.jl/workflows/CI/badge.svg)](https://github.com/JuliaStrings/LegacyStrings.jl/actions?query=workflow%3ACI)
 
 The LegacyStrings package provides compatibility string types from Julia 0.5 (and earlier), which were removed in subsequent versions, including:
 
