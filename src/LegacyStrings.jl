@@ -21,14 +21,18 @@ export
 using Base: @propagate_inbounds
 
 import Base:
+    codeunit,
     containsnul,
     convert,
     getindex,
     isascii,
     isvalid,
+    iterate,
+    lastindex,
     length,
     lowercase,
     map,
+    ncodeunits,
     nextind,
     pointer,
     prevind,
@@ -41,7 +45,6 @@ import Base:
     uppercase,
     write
 
-import Base: iterate
 include("unicodeerror.jl")
 include("directindex.jl")
 
